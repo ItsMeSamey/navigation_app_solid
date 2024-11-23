@@ -26,3 +26,6 @@ dev-dist
 node_modules/
 bun.lockb
 .vite/
+tsconfig.app.tsbuildinfo
+tsconfig.node.tsbuildinfo
+tsconfig.solidui.tsbuildinfo
