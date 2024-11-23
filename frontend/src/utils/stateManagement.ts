@@ -1,4 +1,4 @@
-import { createSelector, createSignal } from "solid-js"
+import { createSelector, createSignal } from 'solid-js'
 
 export interface StorageItem<T> {
   val: T | null
@@ -30,13 +30,13 @@ export function getStorageItem<T>(key: string, stringify?: (value: T) => string,
 
 //  Google User Response Format / User Data
 // {
-//   "id": "124276...",
-//   "email": "sa...@gmail.com",
-//   "verified_email": true,
-//   "name": "Sanyam Singh",
-//   "given_name": "Sanyam",
-//   "family_name": "Singh",
-//   "picture": "https://lh3.googleusercontent.com/a/..."
+//   'id': '124276...',
+//   'email': 'sa...@gmail.com',
+//   'verified_email': true,
+//   'name': 'Sanyam Singh',
+//   'given_name': 'Sanyam',
+//   'family_name': 'Singh',
+//   'picture': 'https://lh3.googleusercontent.com/a/...'
 // }
 export interface GoogleUserResponse {
   id: string,
@@ -47,7 +47,7 @@ export interface GoogleUserResponse {
   family_name: string,
   picture: string,
 }
-export const userData = getStorageItem<GoogleUserResponse>("!User", JSON.stringify, JSON.parse)
+export const userData = getStorageItem<GoogleUserResponse>('!User', JSON.stringify, JSON.parse)
 
 
 // Page Navigaion

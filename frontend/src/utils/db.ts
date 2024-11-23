@@ -10,7 +10,7 @@ type dbType = IDBPDatabase<{
   }
 }>
 
-const version = getStorageItem<number>("!Version", String, Number, 1)
+const version = getStorageItem<number>('!Version', String, Number, 1)
 var db: dbType | null = null
 
 export async function getDb(): Promise<dbType> {

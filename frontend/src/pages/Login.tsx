@@ -1,14 +1,14 @@
-import { createSignal,  onCleanup, onMount, Show } from "solid-js"
-import { Button } from "../components/ui/button"
+import { createSignal,  onCleanup, onMount, Show } from 'solid-js'
+import { Button } from '../components/ui/button'
 import {
   Card,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle
-} from "../components/ui/card"
-import { IconBrandGoogle, IconCommand } from "../components/icons"
-import { GoogleUserResponse, setP, userData } from "../utils/stateManagement"
+} from '../components/ui/card'
+import { IconBrandGoogle, IconCommand } from '../components/icons'
+import { GoogleUserResponse, setP, userData } from '../utils/stateManagement'
 
 
 function oauthSignIn() {
@@ -119,22 +119,22 @@ function UserAuthForm() {
     setTimeout(() => updateLoginText(1), 1000)
   })
 
-  return <Card class="md:w-[350px] m-auto">
+  return <Card class='md:w-[350px] m-auto'>
     <CardHeader>
-      <CardTitle class="text-center">Login</CardTitle>
+      <CardTitle class='text-center'>Login</CardTitle>
       <Show when={error()} fallback={
-        <CardDescription class="text-center">
+        <CardDescription class='text-center'>
           {loginText()}
         </CardDescription>
       }>
-        <CardDescription class="text-center text-red-500">
+        <CardDescription class='text-center text-red-500'>
           {error()}
         </CardDescription>
       </Show>
     </CardHeader>
-    <CardFooter class="justify-center">
-      <Button class="font-semibold text-xl" onclick={oauthSignIn}>
-        Login With <IconBrandGoogle class="size-8 inline-block align-middle ml-2 animate-bounce transform-gpu will-change-transform transition antialiased" />
+    <CardFooter class='justify-center'>
+      <Button class='font-semibold text-xl' onclick={oauthSignIn}>
+        Login With <IconBrandGoogle class='size-8 inline-block align-middle ml-2 animate-bounce transform-gpu will-change-transform transition antialiased' />
       </Button>
     </CardFooter>
   </Card>
@@ -142,39 +142,39 @@ function UserAuthForm() {
 
 export default function Login() {
   return (
-    <div class="container relative h-full flex-col items-center justify-center grid lg:max-w-none lg:grid-cols-2 lg:px-0">
-      <div class="relative hidden h-full flex-col p-10 dark:border-r lg:flex bg-muted">
-        <div class="absolute inset-0" />
-        <div class="relative z-20 flex items-center text-lg font-medium">
-          <IconCommand class="mr-2 size-6" />
+    <div class='container relative h-full flex-col items-center justify-center grid lg:max-w-none lg:grid-cols-2 lg:px-0'>
+      <div class='relative hidden h-full flex-col p-10 dark:border-r lg:flex bg-muted'>
+        <div class='absolute inset-0' />
+        <div class='relative z-20 flex items-center text-lg font-medium'>
+          <IconCommand class='mr-2 size-6' />
           Acme Inc
         </div>
-        <div class="relative z-20 mt-auto">
-          <blockquote class="space-y-2">
-            <p class="text-lg">
+        <div class='relative z-20 mt-auto'>
+          <blockquote class='space-y-2'>
+            <p class='text-lg'>
               &ldquo;This library has saved me countless hours of work and helped me deliver
               stunning designs to my clients faster than ever before.&rdquo;
             </p>
-            <footer class="text-sm">Sofia Davis</footer>
+            <footer class='text-sm'>Sofia Davis</footer>
           </blockquote>
         </div>
       </div>
-      <div class="lg:p-8">
-        <div class="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-          <div class="flex flex-col space-y-2 text-center">
-            <h1 class="text-2xl font-semibold tracking-tight">Create an account</h1>
-            <p class="text-sm text-muted-foreground">
+      <div class='lg:p-8'>
+        <div class='mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]'>
+          <div class='flex flex-col space-y-2 text-center'>
+            <h1 class='text-2xl font-semibold tracking-tight'>Create an account</h1>
+            <p class='text-sm text-muted-foreground'>
               Easy Navigation on tip of your hands
             </p>
           </div>
           <UserAuthForm />
-          <p class="px-8 text-center text-sm text-muted-foreground">
-            By clicking continue, you agree to our{" "}
-            <a href="/terms" class="underline underline-offset-4 hover:text-primary">
+          <p class='px-8 text-center text-sm text-muted-foreground'>
+            By clicking continue, you agree to our{' '}
+            <a href='/terms' class='underline underline-offset-4 hover:text-primary'>
               Terms of Service
-            </a>{" "}
-            and{" "}
-            <a href="/privacy" class="underline underline-offset-4 hover:text-primary">
+            </a>{' '}
+            and{' '}
+            <a href='/privacy' class='underline underline-offset-4 hover:text-primary'>
               Privacy Policy
             </a>
             .
