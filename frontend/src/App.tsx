@@ -1,4 +1,4 @@
-import { createSignal, onCleanup, onMount } from 'solid-js'
+import { createEffect, createSignal, onCleanup, onMount } from 'solid-js'
 
 const corners = {
   TL: { lat: 30.356956, lon: 76.358519 },
@@ -57,6 +57,10 @@ export default function App() {
   })
 
   const [positionStyle, setPositionStyle] = createSignal(calculatePosition(position().lat, position().lon))
+
+  createEffect(() => {
+    console.log(positionStyle())
+  })
 
   return (
     <div class="relative w-full h-screen bg-gray-100">
