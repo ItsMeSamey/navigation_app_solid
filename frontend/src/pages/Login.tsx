@@ -1,13 +1,13 @@
 import { createSignal,  onCleanup, onMount, Show } from 'solid-js'
-import { Button } from '../components/ui/button'
+import { Button } from '~/registry/ui/button'
 import {
   Card,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle
-} from '../components/ui/card'
-import { IconBrandGoogle, IconCommand } from '../components/icons'
+} from '~/registry/ui/card'
+import { IconBrandGoogle, IconCommand } from '~/components/icons'
 import { GoogleUserResponse, setP, userData } from '../utils/stateManagement'
 
 

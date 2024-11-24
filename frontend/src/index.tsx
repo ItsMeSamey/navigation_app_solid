@@ -3,7 +3,7 @@ import { render } from 'solid-js/web'
 import Login from './pages/Login'
 import './app.css'
 import { Match, Switch } from 'solid-js'
-import ModeToggle from './components/custom/ModeToggle'
+import ModeToggle from './components/ModeToggle'
 import Dashboard from './pages/Dashboard'
 import { selectP, setP } from './utils/stateManagement'
 

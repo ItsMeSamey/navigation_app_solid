@@ -1,14 +1,14 @@
 import { Match, Switch } from 'solid-js'
 import { useColorMode } from '@kobalte/core'
-import { Button } from '../ui/button'
+import { Button } from '~/registry/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
-} from '../ui/dropdown-menu'
+} from '~/registry/ui/dropdown-menu'
 
-import { IconSun, IconMoon, IconLaptop } from '../icons'
+import { IconSun, IconMoon, IconLaptop } from '~/components/icons'
 
 export default function ModeToggle() {
   const { colorMode, setColorMode } = useColorMode()
