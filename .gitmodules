@@ -4,3 +4,9 @@
 [submodule "frontend/submodules/solid-ui"]
 	path = frontend/submodules/solid-ui
 	url = https://github.com/sek-consulting/solid-ui
+[submodule "admin/submodules/shadcn-solid"]
+	path = admin/submodules/shadcn-solid
+	url = https://github.com/hngngn/shadcn-solid
+[submodule "admin/submodules/solid-ui"]
+	path = admin/submodules/solid-ui
+	url = https://github.com/sek-consulting/solid-ui
