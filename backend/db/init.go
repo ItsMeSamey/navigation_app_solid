@@ -47,7 +47,7 @@ func init() {
   err = client.Ping(ctx, nil)
   if err != nil { panic(err) }
 
-  Db = client.Database("2024_game_theory")
+  Db = client.Database("thapar_nav_app")
 
   wg := sync.WaitGroup{}
   wg.Add(2)

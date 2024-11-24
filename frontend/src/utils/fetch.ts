@@ -1,18 +1,18 @@
-import { getStorageItem } from './stateManagement'
-
 export const site = 'http://127.0.0.1:8080/'
 
-export const loginData = getStorageItem<{method: string, auth: string}>('!Auth', JSON.stringify, JSON.parse)
+export interface Location {
+  id: string
+  names: string[]
 
-// Hashes a string using SHA-256
-async function hash(val: string): Promise<string> {
-  const encoder = new TextEncoder()
-  const data = encoder.encode(val)
+  lati: number
+  long: number
+}
 
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  const hashHex = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('')
-
-  return hashHex
+export async function GetLocations(): Promise<Location[]> {
+  const response = await fetch(site + 'location')
+  if (response.status !== 200) {
+    throw new Error('Fetching locations Failed')
+  } 
+  return await response.json() as Location[]
 }
 
