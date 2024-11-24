@@ -1,12 +1,11 @@
 providers = ["go"]
 
-[phases.setup]
-nixPkgs = ["go"]
 
 [phases.build]
-dependsOn = ["...", "setup"]
+nixPkgs = ["go"]
 cmds = ["go mod tidy", "go build -o main main.go", "touch backend/.env"]
 
 [start]
+dependsOn = ["..."]
 cmd = "./main"
 
