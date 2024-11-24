@@ -2,7 +2,7 @@ providers = ["go"]
 buildImage = 'ghcr.io/railwayapp/nixpacks:latest'
 
 [phases.build]
-cmds = ["go mod tidy", "go build -o main main.go", "touch backend/.env"]
+cmds = ["cd backend && go mod tidy", "cd backend && go build -o main main.go", "touch backend/.env"]
 
 [start]
 cmd = "cd backend && ./main"
