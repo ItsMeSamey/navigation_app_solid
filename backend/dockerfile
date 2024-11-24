@@ -1,0 +1,11 @@
+FROM golang:latest
+WORKDIR /app
+
+COPY ./ .
+EXPOSE 8080
+
+RUN go mod tidy
+RUN go get ./...
+
+#CMD ["go", "run", "main.go", ">", "./log/stdout.log"]
+CMD go run main.go > logs/stdout.log 2> logs/stderr.log

@@ -1,0 +1,11 @@
+services:
+  backend:
+    image: thapar_nav_app
+    volumes:
+      - ./logs:/app/logs
+    build:
+      context: .
+      dockerfile: ./dockerfile
+    ports:
+      - "8080:8080"
+    restart: always
