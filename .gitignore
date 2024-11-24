@@ -29,3 +29,6 @@ bun.lockb
 tsconfig.app.tsbuildinfo
 tsconfig.node.tsbuildinfo
 tsconfig.solidui.tsbuildinfo
+
+.env
+package-lock.json

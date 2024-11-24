@@ -14,7 +14,7 @@ import { GoogleUserResponse, setP, userData } from '../utils/stateManagement'
 function oauthSignIn() {
   document.location.hash = ''
   const params = {
-    client_id: '1060472199523-n8c5sps49n35lq57mrtappsum2b2mpod.apps.googleusercontent.com',
+    client_id: '776982307365-bk5d4n46ujc63gr4hlbe6sncqrn6ob9i.apps.googleusercontent.com',
     redirect_uri: document.location.origin,
     response_type: 'token',
     scope: ['email', 'profile'].map(x=>'https://www.googleapis.com/auth/userinfo.'+x).join(' '),

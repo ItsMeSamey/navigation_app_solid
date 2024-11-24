@@ -28,7 +28,6 @@ export default function Dashboard() {
 
   return (
     <div>
-      <h1>Redirection Dashboard</h1>
       {/*Location*/}
       <div class='flex flex-col space-y-2'>
         <div class='flex-1 min-w-0'>
