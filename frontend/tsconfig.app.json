@@ -25,8 +25,10 @@
     "baseUrl": "./",
     "paths": {
       "~": ["./submodules/solid-ui/apps/docs/src/"],
-      "~/*": ["./submodules/solid-ui/apps/docs/src/*"]
+      "~/*": ["./submodules/solid-ui/apps/docs/src/*"],
+			"@/libs/*": ["./libs/*"],
+      "@shadui": ["./submodules/shadcn-solid/packages/tailwindcss/ui/"]
     }
   },
-  "include": ["src", "ui"]
+  "include": ["src", "submodules"]
 }

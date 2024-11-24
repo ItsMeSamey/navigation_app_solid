@@ -1,7 +1,6 @@
 {
   "files": [],
   "references": [
-    { "path": "./submodules/solid-ui/apps/docs/tsconfig.json" },
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
   ]

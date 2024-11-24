@@ -16,6 +16,8 @@ export default defineConfig({
   resolve: {
     alias: {
       "~": path.resolve(__dirname, "./submodules/solid-ui/apps/docs/src/"),
+      "@shadui": path.resolve(__dirname, "./submodules/shadcn-solid/packages/tailwindcss/ui/"),
+      "@/libs": path.resolve(__dirname, "./submodules/shadcn-solid/packages/tailwindcss/libs/"),
     }
   },
 

@@ -10,6 +10,7 @@ import {
 import { IconBrandGoogle, IconCommand } from '~/components/icons'
 import { GoogleUserResponse, setP, userData } from '../utils/stateManagement'
 
+import { Button as SButton } from '@shadui/button'
 
 function oauthSignIn() {
   document.location.hash = ''
