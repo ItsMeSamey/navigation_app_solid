@@ -1,8 +1,6 @@
 providers = ["go"]
 
-
 [phases.build]
-nixPkgs = ["go"]
 cmds = ["go mod tidy", "go build -o main main.go", "touch backend/.env"]
 
 [start]
