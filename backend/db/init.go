@@ -1,17 +1,17 @@
 package db
 
 import (
-	"backend/helpers"
-	"context"
-	"log"
-	"os"
-	"sync"
-	"time"
+  "backend/helpers"
+  "context"
+  "log"
+  "os"
+  "sync"
+  "time"
 
-	utils "github.com/ItsMeSamey/go_utils"
-	"go.mongodb.org/mongo-driver/v2/bson"
-	"go.mongodb.org/mongo-driver/v2/mongo"
-	"go.mongodb.org/mongo-driver/v2/mongo/options"
+  utils "github.com/ItsMeSamey/go_utils"
+  "go.mongodb.org/mongo-driver/v2/bson"
+  "go.mongodb.org/mongo-driver/v2/mongo"
+  "go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 var (
@@ -54,7 +54,10 @@ func init() {
 
   go func() {
     defer wg.Done()
-    _ = AdminDb.mustInit(Db.Collection("users"))
+    admins := AdminDb.mustInit(Db.Collection("admins"))
+    for _, admin := range admins {
+      AdminMailMap[admin.Mail] = admin
+    }
   }()
   go func() {
     defer wg.Done()

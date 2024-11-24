@@ -4,6 +4,7 @@ import (
   "go.mongodb.org/mongo-driver/v2/bson"
 )
 
+var AdminMailMap = make(map[string]*Admin)
 type Admin struct {
   Id bson.ObjectID `bson:"_id" json:"id"`
 
@@ -13,6 +14,7 @@ type Admin struct {
 
 type Location struct {
   Id bson.ObjectID `bson:"_id"`
+  Creator bson.ObjectID `bson:"creator" json:"creator"`
 
   Names []string `bson:"names" json:"names"`
 

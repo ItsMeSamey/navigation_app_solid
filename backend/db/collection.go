@@ -122,6 +122,16 @@ func (c *Collection[T]) Insert(val T) (id bson.ObjectID, err error) {
   return
 }
 
+func (c *Collection[T]) DeleteById(id bson.ObjectID) (deleted int64, err error) {
+  result, err := c.Coll.DeleteOne(context.Background(), bson.M{"_id": id})
+  if err = utils.WithStack(err); err != nil { return }
+
+  c.AllItemsMap.Remove(id)
+  c.Uptodate.Store(false)
+
+  return result.DeletedCount, nil
+}
+
 func (c *Collection[T]) UpdateSetById(id bson.ObjectID, update bson.M) (err error) {
   result, err := c.Coll.UpdateOne(context.Background(), bson.M{"_id": id}, bson.M{"$set": update})
   if err = utils.WithStack(err); err != nil { return }

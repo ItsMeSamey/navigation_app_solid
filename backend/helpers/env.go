@@ -1,15 +1,15 @@
 package helpers
 
 import (
-	"log"
-	"os"
+  "log"
+  "os"
 )
 
 func Getenv(key string) string {
-	val, ok := os.LookupEnv(key)
-	if !ok {
-		log.Fatal("env %s not found", key)
-	}
-	return val
+  val, ok := os.LookupEnv(key)
+  if !ok {
+    log.Fatal("env ", key, " not found")
+  }
+  return val
 }
 
