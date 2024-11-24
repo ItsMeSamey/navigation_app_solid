@@ -1,6 +1,7 @@
 package router
 
 import (
+  "log"
   "os"
   "time"
 
@@ -38,4 +39,8 @@ func init() {
   withAuth.Put("/locations", AddLocation)
   withAuth.Patch("/locations", UpdateLocation)
 
+  log.Fatal(a.Listen("0.0.0.0:8080", fiber.ListenConfig{
+    EnablePrintRoutes: true,
+  }))
 }
+

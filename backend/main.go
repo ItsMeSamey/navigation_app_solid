@@ -1,7 +1,6 @@
 package main
 
-import ()
+import _ "backend/router"
 
-func main() {
-}
+func main() {}
 
