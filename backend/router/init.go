@@ -14,6 +14,7 @@ import (
 )
 
 func init() {
+  UpdateLocationCache()
 
   a := fiber.New(fiber.Config{
     CaseSensitive:      true,
@@ -33,11 +34,11 @@ func init() {
   app.Post("/adminApi", AdminLogin)
 
   withAuthValidation := app.Group("/adminApi", middleware.VerifyJWT)
-  withAuthValidation.Delete("/locations", DeleteLocation)
+  withAuthValidation.Delete("/location", DeleteLocation)
 
   withAuth := app.Group("/adminApi", middleware.AddJwt)
-  withAuth.Put("/locations", AddLocation)
-  withAuth.Patch("/locations", UpdateLocation)
+  withAuth.Put("/location", AddLocation)
+  withAuth.Patch("/location", UpdateLocation)
 
   log.Fatal(a.Listen("0.0.0.0:8080", fiber.ListenConfig{
     EnablePrintRoutes: true,

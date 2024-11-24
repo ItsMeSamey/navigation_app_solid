@@ -61,7 +61,7 @@ export interface LocationInfo {
 }
 
 export async function GetLocations(): Promise<LocationInfo[]> {
-  const response = await fetch(site + 'location')
+  const response = await fetch(site + 'v1/locations')
   if (response.status !== 200) {
     throw new Error('Fetching locations Failed')
   } 
@@ -69,15 +69,15 @@ export async function GetLocations(): Promise<LocationInfo[]> {
 }
 
 export async function DeleteLocation(id: string) {
-  return perform('DELETE', site + 'v1/adminApi/locations/' + id)
+  return perform('DELETE', site + 'v1/adminApi/location' + id)
 }
 
 export async function AddLocation(location: LocationInfo) {
-  return perform('PUT', site + 'v1/adminApi/locations', location)
+  return perform('PUT', site + 'v1/adminApi/location', location)
 }
 
 export async function UpdateLocation(location: LocationInfo) {
-  return perform('PATCH', site + 'v1/adminApi/locations', location)
+  return perform('PATCH', site + 'v1/adminApi/location', location)
 }
 
 export function stripStack(errorString: string): string {

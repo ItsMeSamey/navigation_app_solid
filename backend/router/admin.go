@@ -4,6 +4,7 @@ import (
   "context"
   "errors"
   "net/http"
+  "sync"
   "sync/atomic"
 
   "backend/db"
@@ -96,6 +97,7 @@ func AddLocation(c fiber.Ctx) (err error) {
   _, err = db.LocationDb.Insert(location)
   if err = utils.WithStack(err); err != nil { return }
 
+  go UpdateLocationCache()
   return c.SendStatus(http.StatusCreated)
 }
 
@@ -131,9 +133,9 @@ func UpdateLocation(c fiber.Ctx) (err error) {
   *ptr = location
   db.LocationDb.AllItemsMap.Set(location.Id, ptr)
 
+  go UpdateLocationCache()
   return c.SendStatus(http.StatusAccepted)
 }
-
 
 func DeleteLocation(c fiber.Ctx) (err error) {
   id, err := bson.ObjectIDFromHex(c.Params("id"))
@@ -146,12 +148,14 @@ func DeleteLocation(c fiber.Ctx) (err error) {
     return utils.WithStack(errors.New("location not found"))
   }
 
+  go UpdateLocationCache()
   return c.SendStatus(http.StatusOK)
 }
 
 var locationListCache atomic.Pointer[[]byte]
-
-func UpdateLocationCache(c fiber.Ctx) (err error) {
+var updatingLock sync.Mutex
+func UpdateLocationCache() (err error) {
+  if !updatingLock.TryLock() { return }
   locations, err := db.LocationDb.All()
 
   data, err := json.Marshal(locations)
@@ -159,6 +163,6 @@ func UpdateLocationCache(c fiber.Ctx) (err error) {
    
   locationListCache.Store(&data)
 
-  return c.SendStatus(http.StatusOK)
+  return
 }
 

@@ -109,9 +109,21 @@ function DialogueWithLocation(
   )
 }
 
-function ShowAddDialog({location, setLocation}: {location: Accessor<LocationInfo | null>, setLocation: Setter<LocationInfo | null>}) {
+function ShowAddDialog({location, setLocation, setList}: {location: Accessor<LocationInfo | null>, setLocation: Setter<LocationInfo | null>, setList: Setter<LocationInfo[]>}) {
   return DialogueWithLocation(location, setLocation, (l, stopLoading) => {
-    AddLocation(l).then(() => setLocation(null)).catch(e => showToast(
+    if (!l) return stopLoading()
+    if (!l.lat || !l.long) {
+      l.lat = geolocation().lat
+      l.long = geolocation().long
+    }
+
+    AddLocation(l).then(() => {
+      setList(old => {
+        old.push(l)
+        return old
+      })
+      setLocation(null)
+    }).catch(e => showToast(
       {title: 'Error', description: e.message, variant: 'error', duration: 5000}
     )).finally(stopLoading)
   }, 'Add')
@@ -119,7 +131,11 @@ function ShowAddDialog({location, setLocation}: {location: Accessor<LocationInfo
 
 function ShowUpdateDialog({location, setLocation}: {location: Accessor<LocationInfo | null>, setLocation: Setter<LocationInfo | null>}) {
   return DialogueWithLocation(location, setLocation, (l, stopLoading) => {
-    if (!l) return
+    if (!l) return stopLoading()
+    if (!l.lat || !l.long) {
+      l.lat = geolocation().lat
+      l.long = geolocation().long
+    }
     UpdateLocation(l).then(() => setLocation(null)).catch(e => showToast(
       {title: 'Error', description: e.message, variant: 'error', duration: 5000}
     )).finally(stopLoading)
@@ -130,7 +146,7 @@ function AsBadges({keys, ...props}: {vals: string[]} extends any? any: any) {
   return <For each={keys}>{key => <Badge {...props}>{key}</Badge>}</For>
 }
 
-function LocationList({list}: {list: Accessor<LocationInfo[]>}) {
+function LocationList({list, setList}: {list: Accessor<LocationInfo[]>, setList: Setter<LocationInfo[]>}) {
   const [deleteDialogue, setDeleteDialogue] = createSignal<LocationInfo | null>(null)
   const [updateDialogue, setUpdateDialogue] = createSignal<LocationInfo | null>(null)
 
@@ -151,7 +167,11 @@ function LocationList({list}: {list: Accessor<LocationInfo[]>}) {
             <Button
               class='bg-red-500 hover:bg-red-700'
               onClick={() => {
-                DeleteLocation(deleteDialogue()!.id).then(() => setDeleteDialogue(null)).catch((e) => {
+                DeleteLocation(deleteDialogue()!.id).then(() => {
+                  const toDel = deleteDialogue()!
+                  setList(old => old.filter(l => l.id !== toDel.id))
+                  setDeleteDialogue(null)
+                }).catch((e) => {
                   showToast({title: 'Error', description: e.message, variant: 'error', duration: 5000})
                 })
               }}
@@ -226,7 +246,7 @@ export default function LocationManager() {
     misspellings: [],
     lat: 0,
     long: 0,
-  }])
+  }], { equals: false })
   const [addDialogue, setAddDialogue] = createSignal<LocationInfo | null>(null)
 
   function updateLocationsList() { GetLocations().then(setList).catch(setError) }
@@ -235,7 +255,11 @@ export default function LocationManager() {
   return (
     <>
       <Toaster />
-      <ShowAddDialog location={addDialogue} setLocation={setAddDialogue} />
+      <ShowAddDialog
+        location={addDialogue}
+        setLocation={setAddDialogue}
+        setList={setList}
+      />
       <Card>
         <CardHeader>
           <div class='flex flex-row items-center'>
@@ -258,7 +282,7 @@ export default function LocationManager() {
               {error()}
             </span>
           </Show>
-          <LocationList list={list}/>
+          <LocationList list={list} setList={setList}/>
         </CardContent>
       </Card>
     </>
