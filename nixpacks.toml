@@ -1,8 +1,5 @@
-[build]
-  builder = "heroku/buildpacks:go"
-  path = "backend"
+providers = ["go"]
 
-[launch]
-  port = "8080"
-  command = "./backend/myapp"
+[start]
+cmd = "go run main.go"
 
