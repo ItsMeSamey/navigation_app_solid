@@ -18,7 +18,7 @@ import { Accessor } from 'solid-js'
 import { showToast } from '~/registry/ui/toast'
 import { Toaster } from '~/registry/ui/toast'
 
-const [geolocation, setGeolocation] = createSignal<{lat: number, long: number}>({lat: 0, long: 0})
+const [geolocation, setGeolocation] = createSignal<{lat?: number, long?: number}>({})
 
 function DialogueWithLocation(
   location: Accessor<LocationInfo | null>,
@@ -65,10 +65,10 @@ function DialogueWithLocation(
           <TextField>
             <TextFieldLabel>Latitude</TextFieldLabel>
             <TextFieldInput
-              placeholder='Latitude'
+              placeholder={String(geolocation().lat ?? 'Latitude')}
               min={-90}
               max={90}
-              value={untrack(location)?.lat}
+              value={untrack(location)?.lat ?? geolocation().lat}
               type='number'
               onInput={(e) => {
                 setFine('lat', (e.target as HTMLInputElement).valueAsNumber)
@@ -78,10 +78,10 @@ function DialogueWithLocation(
           <TextField>
             <TextFieldLabel>Longitude</TextFieldLabel>
             <TextFieldInput
-              placeholder='Longitude'
+              placeholder={String(geolocation().long ?? 'Longitude')}
               min={-180}
               max={180}
-              value={untrack(location)?.long}
+              value={untrack(location)?.long ?? geolocation().long}
               type='number'
               onInput={(e) => {
                 setFine('long', (e.target as HTMLInputElement).valueAsNumber)
@@ -113,8 +113,8 @@ function ShowAddDialog({location, setLocation, setList}: {location: Accessor<Loc
   return DialogueWithLocation(location, setLocation, (l, stopLoading) => {
     if (!l) return stopLoading()
     if (!l.lat || !l.long) {
-      l.lat = geolocation().lat
-      l.long = geolocation().long
+      l.lat = geolocation().lat ?? (() => {throw new Error('No geolocation found')})()
+      l.long = geolocation().long ?? (() => {throw new Error('No geolocation found')})()
     }
 
     AddLocation(l).then(() => {
@@ -122,6 +122,7 @@ function ShowAddDialog({location, setLocation, setList}: {location: Accessor<Loc
         old.push(l)
         return old
       })
+      showToast({title: 'Success', description: <>Location {l.names.join(', ')}({l.long}, {l.lat}) Added</>, variant: 'success', duration: 5000})
       setLocation(null)
     }).catch(e => showToast(
       {title: 'Error', description: e.message, variant: 'error', duration: 5000}
@@ -133,10 +134,14 @@ function ShowUpdateDialog({location, setLocation}: {location: Accessor<LocationI
   return DialogueWithLocation(location, setLocation, (l, stopLoading) => {
     if (!l) return stopLoading()
     if (!l.lat || !l.long) {
-      l.lat = geolocation().lat
-      l.long = geolocation().long
+      l.lat = geolocation().lat ?? (() => {throw new Error('No geolocation found')})()
+      l.long = geolocation().long ?? (() => {throw new Error('No geolocation found')})()
     }
-    UpdateLocation(l).then(() => setLocation(null)).catch(e => showToast(
+
+    UpdateLocation(l).then(() => {
+      showToast({title: 'Success', description: <>Location {l.names.join(', ')}({l.long}, {l.lat}) Updated Successfully</>, variant: 'success', duration: 5000})
+      setLocation(null)
+    }).catch(e => showToast(
       {title: 'Error', description: e.message, variant: 'error', duration: 5000}
     )).finally(stopLoading)
   }, 'Update')
@@ -170,6 +175,7 @@ function LocationList({list, setList}: {list: Accessor<LocationInfo[]>, setList:
                 DeleteLocation(deleteDialogue()!.id).then(() => {
                   const toDel = deleteDialogue()!
                   setList(old => old.filter(l => l.id !== toDel.id))
+                  showToast({title: 'Deletion successful', description: <>Location {toDel.names.join(', ')}({toDel.long}, {toDel.lat}) Deleted</>, variant: 'success', duration: 5000})
                   setDeleteDialogue(null)
                 }).catch((e) => {
                   showToast({title: 'Error', description: e.message, variant: 'error', duration: 5000})
@@ -237,7 +243,6 @@ export default function LocationManager() {
   onCleanup(() => {
     navigator.geolocation.clearWatch(watchId)
   })
-
 
   const [error, setError] = createSignal<string>('')
   const [list, setList] = createSignal<LocationInfo[]>([{
