@@ -1,171 +1,267 @@
-
-import { createSignal, createEffect, onCleanup } from "solid-js";
+import { createSignal, For, Show, Setter, onMount, onCleanup, createEffect, untrack } from 'solid-js'
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "~/registry/ui/card";
-import { Button } from "~/registry/ui/button";
-import { TextField } from "~/registry/ui/text-field";
-import { Table, TableBody, TableCell, TableHeader, TableRow } from "~/registry/ui/table";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter } from "~/registry/ui/dialog";
+} from '~/registry/ui/card'
+import { Button } from '~/registry/ui/button'
+import { TextField, TextFieldInput, TextFieldLabel } from '~/registry/ui/text-field'
+import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader } from '@shadui/alert-dialog'
+import { AddLocation, UpdateLocation, DeleteLocation, GetLocations, LocationInfo } from '../utils/fetch'
+import { IconClock, IconDotsVertical, IconPlus, IconTrash } from '~/components/icons'
+import { Badge } from '~/registry/ui/badge'
+import { Dialog, DialogContent, DialogFooter, DialogHeader } from '@shadui/dialog'
+import ModeToggle from '../components/ModeToggle'
+import { Accessor } from 'solid-js'
+import { showToast } from '~/registry/ui/toast'
+import { Toaster } from '~/registry/ui/toast'
 
-import { AddLocation, UpdateLocation, DeleteLocation, GetLocations, Location } from '../utils/fetch';
+const [geolocation, setGeolocation] = createSignal<{lat: number, long: number}>({lat: 0, long: 0})
 
-export default function LocationManager() {
-  const [locations, setLocations] = createSignal<Location[]>([]);
-  const [showAddDialog, setShowAddDialog] = createSignal(false);
-  const [showUpdateDialog, setShowUpdateDialog] = createSignal(false);
-  const [selectedLocation, setSelectedLocation] = createSignal<Location | null>(null);
-  const [newLocation, setNewLocation] = createSignal<Location>({
-    id: '',
-    names: [],
-    lati: 0,
-    long: 0
-  });
+function DialogueWithLocation(
+  location: Accessor<LocationInfo | null>,
+  setLocation: Setter<LocationInfo | null>,
+  onSubmit: (location: LocationInfo, stopLoading: () => void) => void,
+  submitName: string
+) {
+  const [loading, setLoading] = createSignal(false)
+  function setFine(key: keyof(LocationInfo), value: any) {
+    if (!value) return
+    setLocation({ ...location()!, [key]: value })
+  }
 
-  // Fetch locations when the component is mounted
-  createEffect(() => {
-    async function fetchLocations() {
-      try {
-        const data = await GetLocations();
-        setLocations(data);
-      } catch (error) {
-        console.error("Error fetching locations:", error);
-      }
-    }
+  return (
+    <Dialog open={Boolean(location())} onOpenChange={() => setLocation(null)}>
+      <DialogContent>
+        <DialogHeader>
+          <h3>{submitName} Location</h3>
+        </DialogHeader>
+        <div>
 
-    fetchLocations();
-    onCleanup(() => {});
+          <TextField>
+            <TextFieldLabel>Location Name</TextFieldLabel>
+            <TextFieldInput
+              placeholder='Location Name'
+              type='text'
+              value={untrack(location)?.names?.join(', ')}
+              onInput={(e) => {
+                setFine('names', (e.target as HTMLInputElement).value.split(',').map(s => s.trim()))
+              }
+            }/>
+          </TextField>
+          <TextField>
+            <TextFieldLabel>Misspellings</TextFieldLabel>
+            <TextFieldInput
+              placeholder='Misspellings'
+              type='text'
+              value={untrack(location)?.misspellings?.join(', ')}
+              onInput={(e) => {
+                setFine('misspellings', (e.target as HTMLInputElement).value.split(',').map(s => s.trim()))
+              }
+            }/>
+          </TextField>
+          <TextField>
+            <TextFieldLabel>Latitude</TextFieldLabel>
+            <TextFieldInput
+              placeholder='Latitude'
+              min={-90}
+              max={90}
+              value={untrack(location)?.lat}
+              type='number'
+              onInput={(e) => {
+                setFine('lat', (e.target as HTMLInputElement).valueAsNumber)
+              }
+            }/>
+          </TextField>
+          <TextField>
+            <TextFieldLabel>Longitude</TextFieldLabel>
+            <TextFieldInput
+              placeholder='Longitude'
+              min={-180}
+              max={180}
+              value={untrack(location)?.long}
+              type='number'
+              onInput={(e) => {
+                setFine('long', (e.target as HTMLInputElement).valueAsNumber)
+              }
+            }/>
+          </TextField>
+        </div>
+        <DialogFooter>
+          <Button onClick={() => setLocation(null)} disabled={loading()}>Cancel</Button>
+          <Button
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              setLoading(true)
+              onSubmit(location()!, () => setLoading(false))
+            }}
+            disabled={loading()}
+          >
+            <Show when={loading()} fallback={submitName}><IconClock class='animate-spin size-6 p-0' /></Show>
+          </Button>
 
-  });
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
 
-  const handleAddLocation = async () => {
-    await AddLocation(newLocation());
-    setShowAddDialog(false);
-    await refreshLocations();
-  };
+function ShowAddDialog({location, setLocation}: {location: Accessor<LocationInfo | null>, setLocation: Setter<LocationInfo | null>}) {
+  return DialogueWithLocation(location, setLocation, (l, stopLoading) => {
+    AddLocation(l).then(() => setLocation(null)).catch(e => showToast(
+      {title: 'Error', description: e.message, variant: 'error', duration: 5000}
+    )).finally(stopLoading)
+  }, 'Add')
+}
 
-  const handleUpdateLocation = async () => {
-    if (selectedLocation()) {
-      await UpdateLocation(selectedLocation()!);
-      setShowUpdateDialog(false);
-      await refreshLocations();
-    }
-  };
+function ShowUpdateDialog({location, setLocation}: {location: Accessor<LocationInfo | null>, setLocation: Setter<LocationInfo | null>}) {
+  return DialogueWithLocation(location, setLocation, (l, stopLoading) => {
+    if (!l) return
+    UpdateLocation(l).then(() => setLocation(null)).catch(e => showToast(
+      {title: 'Error', description: e.message, variant: 'error', duration: 5000}
+    )).finally(stopLoading)
+  }, 'Update')
+}
 
-  const handleDeleteLocation = async (id: string) => {
-    await DeleteLocation(id);
-    await refreshLocations();
-  };
+function AsBadges({keys, ...props}: {vals: string[]} extends any? any: any) {
+  return <For each={keys}>{key => <Badge {...props}>{key}</Badge>}</For>
+}
 
-  const refreshLocations = async () => {
-    try {
-      const data = await GetLocations();
-      setLocations(data);
-    } catch (error) {
-      console.error("Error fetching locations:", error);
-    }
-  };
+function LocationList({list}: {list: Accessor<LocationInfo[]>}) {
+  const [deleteDialogue, setDeleteDialogue] = createSignal<LocationInfo | null>(null)
+  const [updateDialogue, setUpdateDialogue] = createSignal<LocationInfo | null>(null)
 
   return (
     <>
-      {/* List Locations */}
+      <AlertDialog open={Boolean(deleteDialogue())}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <h3>Delete Location</h3>
+          </AlertDialogHeader>
+          <AlertDialogDescription>
+            Are you sure you want to delete ({deleteDialogue()?.lat}, {deleteDialogue()?.long})
+            <AsBadges keys={deleteDialogue()?.names} class='bg-muted/50 mr-1 text-foreground hover:bg-muted' />
+            <AsBadges keys={deleteDialogue()?.misspellings} class='bg-muted/50 mr-1 text-foreground hover:bg-muted' />
+          </AlertDialogDescription>
+          <AlertDialogFooter>
+            <Button onClick={() => setDeleteDialogue(null)}>Cancel</Button>
+            <Button
+              class='bg-red-500 hover:bg-red-700'
+              onClick={() => {
+                DeleteLocation(deleteDialogue()!.id).then(() => setDeleteDialogue(null)).catch((e) => {
+                  showToast({title: 'Error', description: e.message, variant: 'error', duration: 5000})
+                })
+              }}
+              color='secondary'
+            >
+              Delete
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <ShowUpdateDialog
+        location={updateDialogue}
+        setLocation={setUpdateDialogue}
+      />
+
+      <For each={list()?? []}>
+        {(location) => (
+          <span
+            class='flex py-1 flex-col items-start gap-2 rounded-lg border p-3 mx-4 my-2 text-left text-sm transition-all'
+          >
+            <div class='flex w-full flex-col gap-1'>
+              <div class='flex items-center'>
+                <span class='mr-3'>
+                  <TextField class='bg-muted/50 rounded-lg px-1 mb-1'> Lat: {location.lat.toFixed(4)} </TextField>
+                  <TextField class='bg-muted/50 rounded-lg px-1 mt-1'> Lon: {location.long.toFixed(4)} </TextField>
+                </span>
+                <AsBadges keys={location.names} class='bg-muted/50 mr-1 text-foreground hover:bg-muted' />
+                <div class='ml-auto text-xs flex gap-1'>
+                  <Button
+                    class='bg-muted/50 hover:bg-blue-500/25 p-2 mr-2'
+                    onClick={() => setUpdateDialogue(location)}
+                  > <IconDotsVertical class='stroke-foreground' /> </Button>
+                  <Button
+                    class='bg-muted/50 hover:bg-red-500/25 p-2'
+                    onClick={() => setDeleteDialogue(location)}
+                  > <IconTrash class='stroke-foreground' /> </Button>
+                </div>
+              </div>
+            </div>
+          </span>
+        )}
+      </For>
+    </>
+  )
+}
+
+export default function LocationManager() {
+  var watchId: number
+
+  createEffect(() => {
+    console.log(geolocation())
+  })
+
+  onMount(() => {
+    watchId = navigator.geolocation.watchPosition((w) => {
+      setGeolocation({
+        lat: w.coords.latitude,
+        long: w.coords.longitude,
+      })
+    })
+  })
+
+  onCleanup(() => {
+    navigator.geolocation.clearWatch(watchId)
+  })
+
+
+  const [error, setError] = createSignal<string>('')
+  const [list, setList] = createSignal<LocationInfo[]>([{
+    id: '',
+    names: ['a', 'b'],
+    misspellings: [],
+    lat: 0,
+    long: 0,
+  }])
+  const [addDialogue, setAddDialogue] = createSignal<LocationInfo | null>(null)
+
+  function updateLocationsList() { GetLocations().then(setList).catch(setError) }
+  updateLocationsList()
+
+  return (
+    <>
+      <Toaster />
+      <ShowAddDialog location={addDialogue} setLocation={setAddDialogue} />
       <Card>
         <CardHeader>
-          <CardTitle>Locations</CardTitle>
-          <CardDescription>Manage your locations</CardDescription>
+          <div class='flex flex-row items-center'>
+            <div class='mr-auto'>
+              <CardTitle>Locations</CardTitle>
+              <CardDescription>Manage your locations</CardDescription>
+            </div>
+            <div class='mr-[-1rem] mt-[-2rem] flex flex-row items-center gap-2'>
+              <div
+                class='hover:bg-green-500/25 mr-2 size-9 cursor-pointer flex items-center justify-center rounded transition border border-green-500/25 animate-pulse'
+                onClick={() => setAddDialogue({} as LocationInfo)}
+              > <IconPlus class='stroke-foreground' /> </div>
+              <ModeToggle/>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Latitude</TableCell>
-                <TableCell>Longitude</TableCell>
-                <TableCell>Actions</TableCell>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {locations().map((location) => (
-                <TableRow>
-                  <TableCell>{location.names.join(", ")}</TableCell>
-                  <TableCell>{location.lati}</TableCell>
-                  <TableCell>{location.long}</TableCell>
-                  <TableCell>
-                    <Button onClick={() => {
-                      setSelectedLocation(location);
-                      setShowUpdateDialog(true);
-                    }}>Edit</Button>
-                    <Button onClick={() => handleDeleteLocation(location.id)} color="red">Delete</Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <Show when={error()}>
+            <span class='flex flex-col gap-2 text-red-500 text-center px-10'>
+              {error()}
+            </span>
+          </Show>
+          <LocationList list={list}/>
         </CardContent>
       </Card>
-
-      {/* Add Location Dialog */}
-      <Dialog open={showAddDialog()} onClose={() => setShowAddDialog(false)}>
-        <DialogTrigger asChild>
-          <Button onClick={() => setShowAddDialog(true)}>Add Location</Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <h3>Add New Location</h3>
-          </DialogHeader>
-          <div>
-            <TextField label="Location Name" onInput={(e) => setNewLocation({ ...newLocation(), names: [e.target.value] })} />
-            <TextField label="Latitude" type="number" onInput={(e) => setNewLocation({ ...newLocation(), lati: parseFloat(e.target.value) })} />
-            <TextField label="Longitude" type="number" onInput={(e) => setNewLocation({ ...newLocation(), long: parseFloat(e.target.value) })} />
-          </div>
-          <DialogFooter>
-            <Button onClick={handleAddLocation}>Add</Button>
-            <Button onClick={() => setShowAddDialog(false)} color="secondary">Cancel</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Update Location Dialog */}
-      <Dialog open={showUpdateDialog()} onClose={() => setShowUpdateDialog(false)}>
-        <DialogTrigger asChild>
-          <Button onClick={() => setShowUpdateDialog(true)}>Update Location</Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <h3>Update Location</h3>
-          </DialogHeader>
-          {selectedLocation() && (
-            <>
-              <TextField
-                label="Location Name"
-                value={selectedLocation()?.names.join(", ")}
-                onInput={(e) => setSelectedLocation({ ...selectedLocation()!, names: [e.target.value] })}
-              />
-              <TextField
-                label="Latitude"
-                type="number"
-                value={selectedLocation()?.lati || 0}
-                onInput={(e) => setSelectedLocation({ ...selectedLocation()!, lati: parseFloat(e.target.value) })}
-              />
-              <TextField
-                label="Longitude"
-                type="number"
-                value={selectedLocation()?.long || 0}
-                onInput={(e) => setSelectedLocation({ ...selectedLocation()!, long: parseFloat(e.target.value) })}
-              />
-            </>
-          )}
-          <DialogFooter>
-            <Button onClick={handleUpdateLocation}>Update</Button>
-            <Button onClick={() => setShowUpdateDialog(false)} color="secondary">Cancel</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
-  );
+  )
 }
 

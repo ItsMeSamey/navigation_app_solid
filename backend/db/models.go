@@ -17,8 +17,9 @@ type Location struct {
   Creator bson.ObjectID `bson:"creator" json:"creator"`
 
   Names []string `bson:"names" json:"names"`
+  Misspellings []string `bson:"miss" json:"misspellings"`
 
-  Lati float64 `bson:"lati" json:"lati"`
+  Lat  float64 `bson:"lat" json:"lat"`
   Long float64 `bson:"long" json:"long"`
 }
 

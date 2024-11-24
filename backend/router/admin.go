@@ -67,10 +67,10 @@ func validateLocation(location db.Location) (err error) {
   if len(location.Names) == 0 {
     return utils.WithStack(errors.New("atleast one name is required"))
   }
-  if location.Lati == 0 || location.Long == 0 {
+  if location.Lat == 0 || location.Long == 0 {
     return utils.WithStack(errors.New("latitude and longitude are required"))
   }
-  if location.Lati < -90 || location.Lati > 90 {
+  if location.Lat < -90 || location.Lat > 90 {
     return utils.WithStack(errors.New("latitude must be between -90 and 90"))
   }
   if location.Long < -180 || location.Long > 180 {
@@ -94,9 +94,7 @@ func AddLocation(c fiber.Ctx) (err error) {
   if err = utils.WithStack(err); err != nil { return }
 
   _, err = db.LocationDb.Insert(location)
-  if err = utils.WithStack(err); err != nil {
-    return err
-  }
+  if err = utils.WithStack(err); err != nil { return }
 
   return c.SendStatus(http.StatusCreated)
 }
@@ -139,9 +137,7 @@ func UpdateLocation(c fiber.Ctx) (err error) {
 
 func DeleteLocation(c fiber.Ctx) (err error) {
   id, err := bson.ObjectIDFromHex(c.Params("id"))
-  if err = utils.WithStack(err); err != nil {
-    return
-  }
+  if err = utils.WithStack(err); err != nil { return }
 
   deletedCount, err := db.LocationDb.DeleteById(id)
   if err = utils.WithStack(err); err != nil { return }

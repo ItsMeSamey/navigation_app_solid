@@ -19,7 +19,6 @@ render(function() {
             <Login />
           </Match>
           <Match when={selectP('Dashboard')}>
-            <ModeToggle />
             <Dashboard />
           </Match>
         </Switch>

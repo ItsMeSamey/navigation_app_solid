@@ -9,12 +9,13 @@ import {
 } from '~/registry/ui/dropdown-menu'
 
 import { IconSun, IconMoon, IconLaptop } from '~/components/icons'
+import { DropdownMenuRootProps } from '@kobalte/core/dropdown-menu'
 
-export default function ModeToggle() {
+export default function ModeToggle(props: DropdownMenuRootProps) {
   const { colorMode, setColorMode } = useColorMode()
 
   return (
-    <DropdownMenu>
+    <DropdownMenu {...props}>
       <DropdownMenuTrigger as={Button<'button'>} variant='ghost' size='sm' class='w-9 px-0'>
         <Switch>
           <Match when={colorMode() === 'light'}>

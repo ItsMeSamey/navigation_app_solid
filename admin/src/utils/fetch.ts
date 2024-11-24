@@ -46,36 +46,41 @@ async function fetchWithAuth(url: string, init?: RequestInit) {
 async function perform(method: string, url: string, body: any | undefined = undefined) {
   const response = await fetchWithAuth(url, {method, body: body && (typeof body === 'string' ? body: JSON.stringify(body))})
   if (response.status === 511) throw new Error('Login required')
-  if (response.status < 200 || response.status >= 300) throw new Error(`Error (status:${response.status}): ${await response.text()}`)
+  if (response.status < 200 || response.status >= 300) throw new Error(`Error (status:${response.status}): ${stripStack(await response.text())}`)
 
   return response
 }
 
-export interface Location {
+export interface LocationInfo {
   id: string
   names: string[]
+  misspellings: string[]
 
-  lati: number
+  lat: number
   long: number
 }
 
-export async function GetLocations(): Promise<Location[]> {
+export async function GetLocations(): Promise<LocationInfo[]> {
   const response = await fetch(site + 'location')
   if (response.status !== 200) {
     throw new Error('Fetching locations Failed')
   } 
-  return await response.json() as Location[]
+  return await response.json() as LocationInfo[]
 }
 
 export async function DeleteLocation(id: string) {
   return perform('DELETE', site + 'v1/adminApi/locations/' + id)
 }
 
-export async function AddLocation(location: Location) {
+export async function AddLocation(location: LocationInfo) {
   return perform('PUT', site + 'v1/adminApi/locations', location)
 }
 
-export async function UpdateLocation(location: Location) {
+export async function UpdateLocation(location: LocationInfo) {
   return perform('PATCH', site + 'v1/adminApi/locations', location)
+}
+
+export function stripStack(errorString: string): string {
+  return errorString.split('##-STACK-##')[0]
 }
 
