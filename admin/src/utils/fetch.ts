@@ -1,6 +1,6 @@
 import { userJwt } from './stateManagement'
 
-export const site = 'http://127.0.0.1:8080/'
+export const site = 'https://navigationappsolid-production.up.railway.app/'
 
 // Admin Login
 export async function LoginAndStore(token: string): Promise<string> {
