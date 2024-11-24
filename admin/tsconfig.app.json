@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+
+    /* Aliases */
+    "baseUrl": "./",
+    "paths": {
+      "~": ["./submodules/solid-ui/apps/docs/src/"],
+      "~/*": ["./submodules/solid-ui/apps/docs/src/*"],
+			"@/libs/*": ["./libs/*"],
+      "@shadui": ["./submodules/shadcn-solid/packages/tailwindcss/ui/"]
+    }
+  },
+  "include": ["src", "submodules"]
+}
