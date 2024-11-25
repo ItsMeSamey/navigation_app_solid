@@ -1,4 +1,4 @@
-import { createSignal, For, Show, Setter, onMount, onCleanup, createEffect } from 'solid-js'
+import { createSignal, For, Show, onMount, onCleanup, createEffect } from 'solid-js'
 import {
   Card,
   CardContent,
@@ -20,19 +20,26 @@ function AsBadges({keys, ...props}: {vals: string[]} extends any? any: any) {
   return <For each={keys}>{key => <Badge {...props}>{key}</Badge>}</For>
 }
 
-function LocationList({list, setList}: {list: Accessor<LocationInfo[]>, setList: Setter<LocationInfo[]>}) {
+function LocationList({list}: {list: Accessor<LocationInfo[]>}) {
   return (
     <>
       <For each={list()?? []}>
         {(location) => (
           <span
-            class='flex py-1 flex-col items-start gap-2 rounded-lg border p-3 mx-4 my-2 text-left text-sm transition-all'
+            class='group flex py-1 flex-col items-start gap-2 rounded-lg border p-3 mx-4 my-2 text-left text-sm transition-all cursor-pointer'
+            onclick={e => {
+              e.preventDefault()
+              e.stopPropagation()
+              window.open(`https://www.google.com/maps/search/?api=1&query=${location.lat},${location.long}`, '_blank')
+            }}
           >
             <div class='flex w-full flex-col gap-1'>
               <div class='flex items-center'>
-                <AsBadges keys={location.names} class='bg-muted/50 mr-1 text-foreground hover:bg-muted' />
+                <AsBadges keys={location.names} class='bg-muted/50 mr-1 text-foreground hover:bg-muted-foreground' />
                 <div class='ml-auto text-xs flex gap-1'>
-									<IconExternalLink />
+                  <span class="p-1 border rounded group-hover:bg-foreground transition-all duration-500">
+                    <IconExternalLink class="group-hover:stroke-background" />
+                  </span>
                 </div>
               </div>
             </div>
@@ -64,13 +71,7 @@ export default function LocationManager() {
   })
 
   const [error, setError] = createSignal<string>('')
-  const [list, setList] = createSignal<LocationInfo[]>([{
-    id: '',
-    names: ['a', 'b'],
-    misspellings: [],
-    lat: 0,
-    long: 0,
-  }], { equals: false })
+  const [list, setList] = createSignal<LocationInfo[]>([], { equals: false })
 
   function updateLocationsList() { GetLocations().then(setList).catch(setError) }
   updateLocationsList()
@@ -96,7 +97,7 @@ export default function LocationManager() {
               {error()}
             </span>
           </Show>
-          <LocationList list={list} setList={setList}/>
+          <LocationList list={list}/>
         </CardContent>
       </Card>
     </>

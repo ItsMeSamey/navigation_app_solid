@@ -26,19 +26,28 @@ try {
   console.log(e)
 }
 
+export async function GetLocations(): Promise<LocationInfo[]> {
+  if (locationsCache.get() !== null) {
+    return locationsCache.get()!
+  }
+
+  const response = await fetch(site + 'v1/locations')
+  if (response.status !== 200) {
+    throw new Error('Fetching locations Failed')
+  }
+  ;(async() => locationsCacheTimestamp.set(await GetLocationsTimestamp()))()
+
+  const locations = await response.json() as LocationInfo[]
+  locationsCache.set(locations)
+
+  return locations
+}
+
 export async function GetLocationsTimestamp(): Promise<number> {
   const response = await fetch(site + 'v1/locations/timestamp')
   if (response.status !== 200) {
     throw new Error('Fetching locations timestamp Failed')
   } 
   return Number(await response.text())
-}
-
-export async function GetLocations(): Promise<LocationInfo[]> {
-  const response = await fetch(site + 'v1/locations')
-  if (response.status !== 200) {
-    throw new Error('Fetching locations Failed')
-  } 
-  return await response.json() as LocationInfo[]
 }
 
