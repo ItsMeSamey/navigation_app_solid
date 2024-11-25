@@ -237,7 +237,9 @@ export default function LocationManager() {
         lat: w.coords.latitude,
         long: w.coords.longitude,
       })
-    })
+    }, (e) => {
+      showToast({title: 'Location Error', description: e.message, variant: 'error', duration: 5000})
+    }, { enableHighAccuracy: true })
   })
 
   onCleanup(() => {
@@ -245,13 +247,7 @@ export default function LocationManager() {
   })
 
   const [error, setError] = createSignal<string>('')
-  const [list, setList] = createSignal<LocationInfo[]>([{
-    id: '',
-    names: ['a', 'b'],
-    misspellings: [],
-    lat: 0,
-    long: 0,
-  }], { equals: false })
+  const [list, setList] = createSignal<LocationInfo[]>([], { equals: false })
   const [addDialogue, setAddDialogue] = createSignal<LocationInfo | null>(null)
 
   function updateLocationsList() { GetLocations().then(setList).catch(setError) }
