@@ -268,7 +268,7 @@ export default function LocationManager() {
               <CardTitle>Locations</CardTitle>
               <CardDescription>Manage your locations</CardDescription>
             </div>
-            <span class='absolute top-1 left-1/2 -translate-x-1/2 text-foreground hover:bg-green-500/50 p-2 rounded py-1 px-2 border border-grey-500/50 bg-muted/50 text-sm max-sm:text-xs break-keep max-sm:p-0'>
+            <span class='absolute top-1 left-1/2 -translate-x-1/2 text-foreground p-2 rounded py-1 px-2 border border-grey-500/50 bg-muted/50 text-sm max-sm:text-xs break-keep max-sm:p-0'>
               {geolocation().lat?.toFixed(7)}, {geolocation().long?.toFixed(7)}
             </span>
             <div class='mr-[-1rem] mt-[-2rem] flex flex-row items-center gap-2'>
