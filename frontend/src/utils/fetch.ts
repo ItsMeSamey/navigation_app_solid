@@ -1,19 +1,44 @@
-export const site = 'http://127.0.0.1:8080/'
+import { getStorageItem } from "./stateManagement"
 
-export interface Location {
+export const site = 'https://navigationappsolid-production.up.railway.app/'
+
+export interface LocationInfo {
   id: string
   names: string[]
   misspellings: string[]
 
-  lati: number
+  lat: number
   long: number
 }
 
-export async function GetLocations(): Promise<Location[]> {
-  const response = await fetch(site + 'location')
+export const locationsCache = getStorageItem<LocationInfo[]>('!Locations', JSON.stringify, JSON.parse)
+export const locationsCacheTimestamp = getStorageItem<number>('!Number', String, Number)
+
+try {
+  const ts = locationsCacheTimestamp.get() === null? null: await GetLocationsTimestamp()
+  if (locationsCacheTimestamp.get() === null || ts !== locationsCacheTimestamp.get()) {
+    GetLocations().then(l => {
+      locationsCache.set(l)
+      locationsCacheTimestamp.set(ts)
+    }).catch(console.log)
+  }
+} catch (e) {
+  console.log(e)
+}
+
+export async function GetLocationsTimestamp(): Promise<number> {
+  const response = await fetch(site + 'v1/locations/timestamp')
+  if (response.status !== 200) {
+    throw new Error('Fetching locations timestamp Failed')
+  } 
+  return Number(await response.text())
+}
+
+export async function GetLocations(): Promise<LocationInfo[]> {
+  const response = await fetch(site + 'v1/locations')
   if (response.status !== 200) {
     throw new Error('Fetching locations Failed')
   } 
-  return await response.json() as Location[]
+  return await response.json() as LocationInfo[]
 }
 

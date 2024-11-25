@@ -68,6 +68,14 @@ export async function GetLocations(): Promise<LocationInfo[]> {
   return await response.json() as LocationInfo[]
 }
 
+export async function GetLocationsTimestamp(): Promise<number> {
+  const response = await fetch(site + 'v1/locations/timestamp')
+  if (response.status !== 200) {
+    throw new Error('Fetching locations timestamp Failed')
+  } 
+  return Number(await response.text())
+}
+
 export async function DeleteLocation(id: string) {
   return perform('DELETE', site + 'v1/adminApi/location' + id)
 }

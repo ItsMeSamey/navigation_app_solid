@@ -6,6 +6,7 @@ import (
   "net/http"
   "sync"
   "sync/atomic"
+  "time"
 
   "backend/db"
   "backend/router/middleware"
@@ -152,8 +153,10 @@ func DeleteLocation(c fiber.Ctx) (err error) {
   return c.SendStatus(http.StatusOK)
 }
 
+
 var locationListCache atomic.Pointer[[]byte]
 var updatingLock sync.Mutex
+var locationListCacheTimestamp atomic.Int64
 func UpdateLocationCache() (err error) {
   if !updatingLock.TryLock() { return }
   locations, err := db.LocationDb.All()
@@ -162,6 +165,7 @@ func UpdateLocationCache() (err error) {
   if err = utils.WithStack(err); err != nil { return }
    
   locationListCache.Store(&data)
+  locationListCacheTimestamp.Store(time.Now().Unix())
 
   return
 }

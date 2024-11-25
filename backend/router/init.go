@@ -3,10 +3,12 @@ package router
 import (
   "log"
   "os"
+  "strconv"
   "time"
 
   "backend/router/middleware"
 
+  utils "github.com/ItsMeSamey/go_utils"
   "github.com/goccy/go-json"
   "github.com/gofiber/fiber/v3"
   "github.com/gofiber/fiber/v3/middleware/cors"
@@ -31,6 +33,7 @@ func init() {
   app := a.Group("/v1")
 
   app.Get("/locations", GetLocations)
+  app.Get("/locations/timestamp", func (c fiber.Ctx) (err error) { return c.Send(utils.S2B(strconv.FormatInt(locationListCacheTimestamp.Load(), 10))) })
   app.Post("/adminApi", AdminLogin)
 
   withAuthValidation := app.Group("/adminApi", middleware.VerifyJWT)
