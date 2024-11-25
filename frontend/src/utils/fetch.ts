@@ -14,17 +14,19 @@ export interface LocationInfo {
 export const locationsCache = getStorageItem<LocationInfo[]>('!Locations', JSON.stringify, JSON.parse)
 export const locationsCacheTimestamp = getStorageItem<number>('!Number', String, Number)
 
-try {
-  const ts = locationsCacheTimestamp.get() === null? null: await GetLocationsTimestamp()
-  if (locationsCacheTimestamp.get() === null || ts !== locationsCacheTimestamp.get()) {
-    GetLocations().then(l => {
-      locationsCache.set(l)
-      locationsCacheTimestamp.set(ts)
-    }).catch(console.log)
+;(async()=>{
+  try {
+    const ts = locationsCacheTimestamp.get() === null? null: await GetLocationsTimestamp()
+    if (locationsCacheTimestamp.get() === null || ts !== locationsCacheTimestamp.get()) {
+      GetLocations().then(l => {
+        locationsCache.set(l)
+        locationsCacheTimestamp.set(ts)
+      }).catch(console.log)
+    }
+  } catch (e) {
+    console.log(e)
   }
-} catch (e) {
-  console.log(e)
-}
+})()
 
 export async function GetLocations(): Promise<LocationInfo[]> {
   if (locationsCache.get() !== null) {
