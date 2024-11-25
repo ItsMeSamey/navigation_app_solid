@@ -1,4 +1,4 @@
-import { getStorageItem, userJwt } from './stateManagement'
+import { userJwt } from './stateManagement'
 
 export const site = 'https://navigationappsolid-production.up.railway.app/'
 
@@ -60,38 +60,13 @@ export interface LocationInfo {
   long: number
 }
 
-export const locationsCache = getStorageItem<LocationInfo[]>('!Locations', JSON.stringify, JSON.parse)
-export const locationsCacheTimestamp = getStorageItem<number>('!Number', String, Number)
-
-;(async()=>{
-  try {
-    const ts = locationsCacheTimestamp.get() === null? null: await GetLocationsTimestamp()
-    if (locationsCacheTimestamp.get() === null || ts !== locationsCacheTimestamp.get()) {
-      GetLocations().then(l => {
-        locationsCache.set(l)
-        locationsCacheTimestamp.set(ts)
-      }).catch(console.log)
-    }
-  } catch (e) {
-    console.log(e)
-  }
-})()
-
 export async function GetLocations(): Promise<LocationInfo[]> {
-  if (locationsCache.get() !== null) {
-    return locationsCache.get()!
-  }
-
   const response = await fetch(site + 'v1/locations')
   if (response.status !== 200) {
     throw new Error('Fetching locations Failed')
   }
-  ;(async() => locationsCacheTimestamp.set(await GetLocationsTimestamp()))()
 
-  const locations = await response.json() as LocationInfo[]
-  locationsCache.set(locations)
-
-  return locations
+  return await response.json() as LocationInfo[]
 }
 
 export async function GetLocationsTimestamp(): Promise<number> {
