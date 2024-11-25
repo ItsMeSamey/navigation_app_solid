@@ -1,6 +1,6 @@
 import { getStorageItem } from "./stateManagement"
 
-export const site = 'https://navigationappsolid-production.up.railway.app/'
+export const site = 'https://thapar-navigation-app.onrender.com/'
 
 export interface LocationInfo {
   id: string

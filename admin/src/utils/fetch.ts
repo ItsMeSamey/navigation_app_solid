@@ -1,6 +1,6 @@
 import { userJwt } from './stateManagement'
 
-export const site = 'https://navigationappsolid-production.up.railway.app/'
+export const site = 'https://thapar-navigation-app.onrender.com/'
 
 // Admin Login
 export async function LoginAndStore(token: string): Promise<string> {
