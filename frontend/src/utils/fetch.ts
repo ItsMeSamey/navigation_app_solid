@@ -14,35 +14,25 @@ export interface LocationInfo {
 export const locationsCache = getStorageItem<LocationInfo[]>('!Locations', JSON.stringify, JSON.parse)
 export const locationsCacheTimestamp = getStorageItem<number>('!Number', String, Number)
 
-;(async()=>{
-  try {
-    const ts = locationsCacheTimestamp.get() === null? null: await GetLocationsTimestamp()
-    if (locationsCacheTimestamp.get() === null || ts !== locationsCacheTimestamp.get()) {
-      GetLocations().then(l => {
-        locationsCache.set(l)
-        locationsCacheTimestamp.set(ts)
-      }).catch(console.log)
-    }
-  } catch (e) {
-    console.log(e)
-  }
-})()
-
-export async function GetLocations(): Promise<LocationInfo[]> {
-  if (locationsCache.get() !== null) {
-    return locationsCache.get()!
-  }
-
+async function GetLocationsRaw(): Promise<LocationInfo[]> {
   const response = await fetch(site + 'v1/locations')
   if (response.status !== 200) {
     throw new Error('Fetching locations Failed')
   }
-  ;(async() => locationsCacheTimestamp.set(await GetLocationsTimestamp()))()
+  return await response.json() as LocationInfo[]
+}
 
-  const locations = await response.json() as LocationInfo[]
-  locationsCache.set(locations)
+let lp: Promise<LocationInfo[]> = (async() => {
+  const ts = locationsCacheTimestamp.get() === null? null: await GetLocationsTimestamp()
+  if (locationsCacheTimestamp.get() === null || ts !== locationsCacheTimestamp.get()) {
+    locationsCache.set(await GetLocationsRaw())
+    locationsCacheTimestamp.set(ts)
+  }
+  return locationsCache.get()!
+})()
 
-  return locations
+export async function GetLocations(): Promise<LocationInfo[]> {
+  return locationsCache.get() ?? await lp
 }
 
 export async function GetLocationsTimestamp(): Promise<number> {

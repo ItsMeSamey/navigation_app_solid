@@ -35,7 +35,7 @@ func init() {
     log.Println("Setting", k, "to", v)
     return os.Setenv(k, v)
   })
-  if err != nil { panic(err)  }
+  if err != nil { panic(err) }
 
   ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
   defer cancel()
