@@ -9,6 +9,7 @@ import {
 } from '~/registry/ui/card'
 import { IconBrandGoogle, IconCommand } from '~/components/icons'
 import { GoogleUserResponse, setP, userData } from '../utils/stateManagement'
+import { stripStack } from '../utils/fetch'
 
 
 function oauthSignIn() {
@@ -128,7 +129,7 @@ function UserAuthForm() {
         </CardDescription>
       }>
         <CardDescription class='text-center text-red-500'>
-          {error()}
+          {stripStack(error()!)}
         </CardDescription>
       </Show>
     </CardHeader>

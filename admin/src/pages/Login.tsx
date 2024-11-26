@@ -9,7 +9,7 @@ import {
 } from '~/registry/ui/card'
 import { IconBrandGoogle } from '~/components/icons'
 import { setP, userJwt } from '../utils/stateManagement'
-import { LoginAndStore } from '../utils/fetch'
+import { LoginAndStore, stripStack } from '../utils/fetch'
 
 function oauthSignIn() {
   document.location.hash = ''
@@ -130,7 +130,7 @@ function UserAuthForm() {
         </CardDescription>
       }>
         <CardDescription class='text-center text-red-500'>
-          {error()}
+          {stripStack(error()!)}
         </CardDescription>
       </Show>
     </CardHeader>

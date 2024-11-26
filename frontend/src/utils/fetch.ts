@@ -43,3 +43,7 @@ export async function GetLocationsTimestamp(): Promise<number> {
   return Number(await response.text())
 }
 
+export function stripStack(errorString: string): string {
+  return errorString.split('##-STACK-##')[0]
+}
+
