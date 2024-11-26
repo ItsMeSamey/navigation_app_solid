@@ -1,7 +1,6 @@
 package router
 
 import (
-  "context"
   "errors"
   "net/http"
   "sync"
@@ -121,18 +120,25 @@ func UpdateLocation(c fiber.Ctx) (err error) {
   if !ok {
     return utils.WithStack(errors.New("location not found"))
   }
+  old := *ptr
 
-  // Set creator
-  location.Creator = c.UserContext().(middleware.ContextWithJWT).UserJWT.Id
+  changed := bson.M{
+    "names": location.Names,
+    "miss": location.Misspellings,
+  }
+  creator := c.UserContext().(middleware.ContextWithJWT).UserJWT.Id
+  if old.Creator != creator {
+    changed["creator"] = creator
+  }
+  if old.Lat != location.Lat {
+    changed["lat"] = location.Lat
+  }
+  if old.Long != location.Long {
+    changed["long"] = location.Long
+  }
 
-  result, err := db.LocationDb.Coll.ReplaceOne(context.Background(), bson.M{"_id": location.Id}, location)
+  err = db.LocationDb.UpdateSetById(location.Id, changed)
   if err = utils.WithStack(err); err != nil { return }
-
-  // Update map
-  db.LocationDb.AllItemsMap.Remove(location.Id)
-  location.Id = result.UpsertedID.(bson.ObjectID)
-  *ptr = location
-  db.LocationDb.AllItemsMap.Set(location.Id, ptr)
 
   go UpdateLocationCacheMaybe()
   return c.SendStatus(http.StatusAccepted)
