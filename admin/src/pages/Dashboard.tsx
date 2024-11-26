@@ -117,6 +117,9 @@ function ShowAddDialog({location, setLocation, setList}: {location: Accessor<Loc
       l.long = geolocation().long ?? (() => {throw new Error('No geolocation found')})()
     }
 
+    l.misspellings.map(m => m.trim()).filter(m => m.length > 0)
+    l.names.map(n => n.trim()).filter(n => n.length > 0)
+
     AddLocation(l).then(() => {
       setList(old => {
         old.push(l)
@@ -137,6 +140,9 @@ function ShowUpdateDialog({location, setLocation}: {location: Accessor<LocationI
       l.lat = geolocation().lat ?? (() => {throw new Error('No geolocation found')})()
       l.long = geolocation().long ?? (() => {throw new Error('No geolocation found')})()
     }
+
+    l.misspellings.map(m => m.trim()).filter(m => m.length > 0)
+    l.names.map(n => n.trim()).filter(n => n.length > 0)
 
     UpdateLocation(l).then(() => {
       showToast({title: 'Success', description: <>Location {l.names.join(', ')}({l.long}, {l.lat}) Updated Successfully</>, variant: 'success', duration: 5000})

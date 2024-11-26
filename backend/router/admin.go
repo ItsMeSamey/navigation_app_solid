@@ -155,12 +155,16 @@ func DeleteLocation(c fiber.Ctx) (err error) {
 
 
 var locationListCache atomic.Pointer[[]byte]
-var updatingLock sync.Mutex
+var locationCacheUpdateLock sync.Mutex
 var locationListCacheTimestamp atomic.Int64
 func UpdateLocationCache() (err error) {
-  if !updatingLock.TryLock() { return }
-  locations, err := db.LocationDb.All()
+  if !locationCacheUpdateLock.TryLock() { return }
+  defer locationCacheUpdateLock.Unlock()
+  return RacyUpdateLocationCache()
+}
 
+func RacyUpdateLocationCache() (err error) {
+  locations, err := db.LocationDb.All()
   data, err := json.Marshal(locations)
   if err = utils.WithStack(err); err != nil { return }
    
