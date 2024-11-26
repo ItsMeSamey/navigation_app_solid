@@ -164,8 +164,8 @@ func UpdateLocationCache() (err error) {
   data, err := json.Marshal(locations)
   if err = utils.WithStack(err); err != nil { return }
    
-  locationListCache.Store(&data)
   locationListCacheTimestamp.Store(time.Now().Unix())
+  locationListCache.Store(&data)
 
   return
 }
