@@ -98,7 +98,7 @@ func AddLocation(c fiber.Ctx) (err error) {
   _, err = db.LocationDb.Insert(location)
   if err = utils.WithStack(err); err != nil { return }
 
-  go UpdateLocationCache()
+  go UpdateLocationCacheMaybe()
   return c.SendStatus(http.StatusCreated)
 }
 
@@ -134,7 +134,7 @@ func UpdateLocation(c fiber.Ctx) (err error) {
   *ptr = location
   db.LocationDb.AllItemsMap.Set(location.Id, ptr)
 
-  go UpdateLocationCache()
+  go UpdateLocationCacheMaybe()
   return c.SendStatus(http.StatusAccepted)
 }
 
@@ -149,7 +149,7 @@ func DeleteLocation(c fiber.Ctx) (err error) {
     return utils.WithStack(errors.New("location not found"))
   }
 
-  go UpdateLocationCache()
+  go UpdateLocationCacheMaybe()
   return c.SendStatus(http.StatusOK)
 }
 
@@ -157,7 +157,7 @@ func DeleteLocation(c fiber.Ctx) (err error) {
 var locationListCache atomic.Pointer[[]byte]
 var locationCacheUpdateLock sync.Mutex
 var locationListCacheTimestamp atomic.Int64
-func UpdateLocationCache() (err error) {
+func UpdateLocationCacheMaybe() (err error) {
   if !locationCacheUpdateLock.TryLock() { return }
   defer locationCacheUpdateLock.Unlock()
   return RacyUpdateLocationCache()
@@ -173,4 +173,27 @@ func RacyUpdateLocationCache() (err error) {
 
   return
 }
+
+func ReferchAllAdmins(c fiber.Ctx) (err error) {
+  db.AdminDb.Uptodate.Store(false);
+  _, err = db.AdminDb.All()
+  if err = utils.WithStack(err); err != nil { return }
+
+  return c.SendStatus(http.StatusOK)
+}
+
+func ReferchAllLocations(c fiber.Ctx) (err error) {
+  db.LocationDb.Uptodate.Store(false);
+  _, err = db.LocationDb.All()
+  if err = utils.WithStack(err); err != nil { return }
+
+  return c.SendStatus(http.StatusOK)
+}
+
+func UpdateLocationCache(c fiber.Ctx) error { 
+    locationCacheUpdateLock.Lock()
+    defer locationCacheUpdateLock.Unlock()
+    RacyUpdateLocationCache()
+    return c.SendStatus(200)
+  }
 

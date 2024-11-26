@@ -16,7 +16,7 @@ import (
 )
 
 func init() {
-  UpdateLocationCache()
+  RacyUpdateLocationCache()
 
   a := fiber.New(fiber.Config{
     CaseSensitive:      true,
@@ -42,12 +42,9 @@ func init() {
   withAuth := app.Group("/adminApi", middleware.AddJwt)
   withAuth.Put("/location", AddLocation)
   withAuth.Patch("/location", UpdateLocation)
-  withAuth.Get("/updateLocationCache", func (c fiber.Ctx) error { 
-    locationCacheUpdateLock.Lock()
-    defer locationCacheUpdateLock.Unlock()
-    RacyUpdateLocationCache()
-    return c.SendStatus(200)
-  })
+  withAuth.Get("/updateLocationCache", UpdateLocationCache)
+  withAuth.Get("/refetchAllLocations", ReferchAllLocations)
+  withAuth.Get("/refetchAllAdmins", ReferchAllAdmins)
 
   log.Fatal(a.Listen("0.0.0.0:8080", fiber.ListenConfig{
     EnablePrintRoutes: true,

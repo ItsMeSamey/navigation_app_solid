@@ -93,3 +93,15 @@ export function stripStack(errorString: string): string {
   return errorString.split('##-STACK-##')[0]
 }
 
+export async function updateLocationCache() {
+  await perform('GET', site + 'v1/adminApi/updateLocationCache')
+}
+
+export async function refetchAllLocations() {
+  await perform('GET', site + 'v1/adminApi/refetchAllLocations')
+}
+
+export async function refetchAllAdmins() {
+  await perform('GET', site + 'v1/adminApi/refetchAllAdmins')
+}
+
