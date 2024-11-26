@@ -78,7 +78,7 @@ export async function GetLocationsTimestamp(): Promise<number> {
 }
 
 export async function DeleteLocation(id: string) {
-  return perform('DELETE', site + 'v1/adminApi/location' + id)
+  return perform('DELETE', site + 'v1/adminApi/location' + '/' + id)
 }
 
 export async function AddLocation(location: LocationInfo) {

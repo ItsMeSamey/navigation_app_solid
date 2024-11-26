@@ -37,7 +37,7 @@ func init() {
   app.Post("/adminApi", AdminLogin)
 
   withAuthValidation := app.Group("/adminApi", middleware.VerifyJWT)
-  withAuthValidation.Delete("/location", DeleteLocation)
+  withAuthValidation.Delete("/location/:id", DeleteLocation)
 
   withAuth := app.Group("/adminApi", middleware.AddJwt)
   withAuth.Put("/location", AddLocation)
