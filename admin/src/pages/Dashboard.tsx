@@ -20,6 +20,10 @@ import { Toaster } from '~/registry/ui/toast'
 
 const [geolocation, setGeolocation] = createSignal<{lat?: number, long?: number}>({})
 
+function showErrorToast(e: Error) {
+  showToast( {title: 'Error ' + e.name, description: e.message, variant: 'error', duration: 5000} )
+}
+
 function DialogueWithLocation(
   location: Accessor<LocationInfo | null>,
   setLocation: Setter<LocationInfo | null>,
@@ -38,8 +42,30 @@ function DialogueWithLocation(
         <DialogHeader>
           <h3>{submitName} Location</h3>
         </DialogHeader>
-        <div>
-
+        <div
+          oncopy={e => {
+            e.stopPropagation()
+            navigator.clipboard.writeText(JSON.stringify(location()))
+          }}
+          onpaste={e => {
+            e.stopPropagation()
+            navigator.clipboard.readText().then(text => {
+              try {
+                const parsed = JSON.parse(text)
+                setFine('lat', parsed.lat)
+                setFine('long', parsed.long)
+                setFine('names', parsed.names)
+                setFine('misspellings', parsed.misspellings)
+                return
+              } catch (e) {showErrorToast(e as Error)}
+              try {
+                const coords = text.split(',').map(Number)
+                setFine('lat', coords[0])
+                setFine('long', coords[1])
+              } catch (e) {showErrorToast(e as Error)}
+            })
+          }}
+        >
           <TextField>
             <TextFieldLabel>Location Name</TextFieldLabel>
             <TextFieldInput
