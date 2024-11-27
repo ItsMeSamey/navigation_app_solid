@@ -6,6 +6,7 @@ export interface StorageItem<T> {
   set: (val: T | null) => void
 }
 
+// You cant set a null or undefined value to localStorage
 export function getStorageItem<T>(key: string, stringify?: (value: T) => string, parser?: (value: string) => T, defaultValue?: T): StorageItem<T> {
   parser = parser ?? ((x: string) => x as T)
   stringify = stringify ?? ((x: T) => x as string)

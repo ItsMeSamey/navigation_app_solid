@@ -261,7 +261,7 @@ export default function LocationManager() {
 
   return (
     <>
-      <Toaster />
+      <Toaster draggable={true} />
       <ShowAddDialog
         location={addDialogue}
         setLocation={setAddDialogue}

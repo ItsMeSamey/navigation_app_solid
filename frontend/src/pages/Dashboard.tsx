@@ -1,4 +1,4 @@
-import { createSignal, For, Show, Setter } from 'solid-js'
+import { createSignal, For, Show, Setter, onMount, onCleanup } from 'solid-js'
 import { TextFieldInput, TextField } from '~/registry/ui/text-field'
 import { Card, CardContent, CardHeader } from '~/registry/ui/card'
 import { Toaster } from '~/registry/ui/toast'
@@ -80,7 +80,7 @@ export default function LocationManager() {
     equals: false,
   })
 
-  window.onkeydown = k => {
+  const keydownListener = (k: KeyboardEvent) => {
     if (k.key === 'Escape') {
       setSearch('')
       document.getElementById('root')!.click()
@@ -88,6 +88,9 @@ export default function LocationManager() {
       document.getElementById('searchBar')?.focus()
     }
   }
+
+  onMount(() => { window.addEventListener('keydown', keydownListener) })
+  onCleanup(() => { window.removeEventListener('keydown', keydownListener) })
 
   function updateLocationsList() { GetLocations().then(setList).catch(setError) }
   updateLocationsList()
