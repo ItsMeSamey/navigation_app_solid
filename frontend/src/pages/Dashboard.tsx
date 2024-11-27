@@ -28,7 +28,7 @@ function LocationList({list, searchText}: {list: Accessor<LocationInfo[]>, searc
 
   return (
     <>
-      <For each={searchText() ? filteredArray(searchText(), list() ?? []) : list()}>
+      <For each={searchText().trim().length > 0 ? filteredArray(searchText(), list() ?? []) : list()}>
         {(location) => (
           <span
             class='group flex py-1 flex-col items-start gap-2 rounded-lg border p-3 mx-4 my-2 text-left text-sm transition-all cursor-pointer'
@@ -55,15 +55,17 @@ function LocationList({list, searchText}: {list: Accessor<LocationInfo[]>, searc
   )
 }
 
-function SearchBar({ setText }: { setText: Setter<string> }) {
+function SearchBar({ text, setText }: { text: Accessor<string>, setText: Setter<string> }) {
   return (
     <div class='hover:bg-muted flex flex-row items-center gap-2 rounded group px-0'>
       <TextField class='px-2 flex flex-row items-center'>
         <IconSearch class='group-hover:scale-125 stroke-foreground transition-all duration-500 transform-gpu will-change-transform' />
         <TextFieldInput
+          id='searchBar'
           type='text'
           class='rounded border border-foreground bg-background px-2 py-1 text-sm group-hover:bg-muted border-none focus:border-none mr-0'
           placeholder='Search Locations'
+          value={text()}
           onInput={(e) => setText(e.currentTarget.value)}
         />
       </TextField>
@@ -74,7 +76,18 @@ function SearchBar({ setText }: { setText: Setter<string> }) {
 export default function LocationManager() {
   const [error, setError] = createSignal<string>('')
   const [list, setList] = createSignal<LocationInfo[]>([], { equals: false })
-  const [search, setSearch] = createSignal<string>('')
+  const [search, setSearch] = createSignal<string>('', {
+    equals: false,
+  })
+
+  window.onkeydown = k => {
+    if (k.key === 'Escape') {
+      setSearch('')
+      document.getElementById('root')!.click()
+    } else {
+      document.getElementById('searchBar')?.focus()
+    }
+  }
 
   function updateLocationsList() { GetLocations().then(setList).catch(setError) }
   updateLocationsList()
@@ -86,7 +99,7 @@ export default function LocationManager() {
         <CardHeader>
           <div class='flex flex-row items-center'>
             <div class='mr-auto'>
-              <SearchBar setText={setSearch} />
+              <SearchBar text={search} setText={setSearch}/>
             </div>
             <div class='mr-[-1rem] mt-[-2rem] flex flex-row items-center gap-2'>
               <ModeToggle/>
