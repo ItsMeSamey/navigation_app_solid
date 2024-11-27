@@ -1,29 +1,34 @@
-import { createSignal, For, Show, onMount, onCleanup, createEffect } from 'solid-js'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '~/registry/ui/card'
-import { GetLocations, LocationInfo } from '../utils/fetch'
-import { IconExternalLink } from '~/components/icons'
+import { createSignal, For, Show, Setter } from 'solid-js'
+import { TextFieldInput, TextField } from '~/registry/ui/text-field'
+import { Card, CardContent, CardHeader } from '~/registry/ui/card'
+import { Toaster } from '~/registry/ui/toast'
 import { Badge } from '~/registry/ui/badge'
+import { GetLocations, LocationInfo } from '../utils/fetch'
 import ModeToggle from '../components/ModeToggle'
 import { Accessor } from 'solid-js'
-import { Toaster } from '~/registry/ui/toast'
-
-const [geolocation, setGeolocation] = createSignal<{lat?: number, long?: number}>({})
-
+import { search, sortKind } from 'fast-fuzzy'
+import { IconExternalLink, IconSearch } from '~/components/icons'
 
 function AsBadges({keys, ...props}: {vals: string[]} extends any? any: any) {
   return <For each={keys}>{key => <Badge {...props}>{key}</Badge>}</For>
 }
 
-function LocationList({list}: {list: Accessor<LocationInfo[]>}) {
+function LocationList({list, searchText}: {list: Accessor<LocationInfo[]>, searchText: Accessor<string>}) {
+  function filteredArray(text: string, keyWords: LocationInfo[]): LocationInfo[] {
+    const result = search(text, keyWords, {
+      ignoreCase: true,
+      ignoreSymbols: true,
+      normalizeWhitespace: true,
+      sortBy: sortKind.bestMatch,
+      threshold: 0.5,
+      keySelector: x => [...(x.names??[]), ...(x.misspellings??[])],
+    })
+    return result
+  }
+
   return (
     <>
-      <For each={list()?? []}>
+      <For each={searchText() ? filteredArray(searchText(), list() ?? []) : list()}>
         {(location) => (
           <span
             class='group flex py-1 flex-col items-start gap-2 rounded-lg border p-3 mx-4 my-2 text-left text-sm transition-all cursor-pointer'
@@ -50,28 +55,26 @@ function LocationList({list}: {list: Accessor<LocationInfo[]>}) {
   )
 }
 
+function SearchBar({ setText }: { setText: Setter<string> }) {
+  return (
+    <div class='hover:bg-muted flex flex-row items-center gap-2 rounded group px-0'>
+      <TextField class='px-2 flex flex-row items-center'>
+        <IconSearch class='group-hover:scale-125 stroke-foreground transition-all duration-500 transform-gpu will-change-transform' />
+        <TextFieldInput
+          type='text'
+          class='rounded border border-foreground bg-background px-2 py-1 text-sm group-hover:bg-muted border-none focus:border-none mr-0'
+          placeholder='Search Locations'
+          onInput={(e) => setText(e.currentTarget.value)}
+        />
+      </TextField>
+    </div>
+  )
+}
+
 export default function LocationManager() {
-  var watchId: number
-
-  createEffect(() => {
-    console.log(geolocation())
-  })
-
-  onMount(() => {
-    watchId = navigator.geolocation.watchPosition((w) => {
-      setGeolocation({
-        lat: w.coords.latitude,
-        long: w.coords.longitude,
-      })
-    })
-  })
-
-  onCleanup(() => {
-    navigator.geolocation.clearWatch(watchId)
-  })
-
   const [error, setError] = createSignal<string>('')
   const [list, setList] = createSignal<LocationInfo[]>([], { equals: false })
+  const [search, setSearch] = createSignal<string>('')
 
   function updateLocationsList() { GetLocations().then(setList).catch(setError) }
   updateLocationsList()
@@ -83,8 +86,7 @@ export default function LocationManager() {
         <CardHeader>
           <div class='flex flex-row items-center'>
             <div class='mr-auto'>
-              <CardTitle>Locations</CardTitle>
-              <CardDescription>Manage your locations</CardDescription>
+              <SearchBar setText={setSearch} />
             </div>
             <div class='mr-[-1rem] mt-[-2rem] flex flex-row items-center gap-2'>
               <ModeToggle/>
@@ -97,7 +99,7 @@ export default function LocationManager() {
               {error()}
             </span>
           </Show>
-          <LocationList list={list}/>
+          <LocationList list={list} searchText={search} />
         </CardContent>
       </Card>
     </>

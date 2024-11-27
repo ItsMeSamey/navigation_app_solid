@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle
 } from '~/registry/ui/card'
-import { IconBrandGoogle, IconCommand } from '~/components/icons'
+import { IconBrandGoogle } from '~/components/icons'
 import { GoogleUserResponse, setP, userData } from '../utils/stateManagement'
 import { stripStack } from '../utils/fetch'
 
@@ -143,23 +143,7 @@ function UserAuthForm() {
 
 export default function Login() {
   return (
-    <div class='container relative h-full flex-col items-center justify-center grid lg:max-w-none lg:grid-cols-2 lg:px-0'>
-      <div class='relative hidden h-full flex-col p-10 dark:border-r lg:flex bg-muted'>
-        <div class='absolute inset-0' />
-        <div class='relative z-20 flex items-center text-lg font-medium'>
-          <IconCommand class='mr-2 size-6' />
-          Acme Inc
-        </div>
-        <div class='relative z-20 mt-auto'>
-          <blockquote class='space-y-2'>
-            <p class='text-lg'>
-              &ldquo;This library has saved me countless hours of work and helped me deliver
-              stunning designs to my clients faster than ever before.&rdquo;
-            </p>
-            <footer class='text-sm'>Sofia Davis</footer>
-          </blockquote>
-        </div>
-      </div>
+    <div class='container relative h-full flex-col items-center justify-center grid lg:max-w-none lg:px-0'>
       <div class='lg:p-8'>
         <div class='mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]'>
           <div class='flex flex-col space-y-2 text-center'>
