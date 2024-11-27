@@ -1,4 +1,4 @@
-import { createSignal, For, Show, Setter, onMount, onCleanup, createEffect, untrack } from 'solid-js'
+import { createSignal, For, Show, Setter, onMount, onCleanup, createEffect } from 'solid-js'
 import {
   Card,
   CardContent,
@@ -30,48 +30,67 @@ function DialogueWithLocation(
   onSubmit: (location: LocationInfo, stopLoading: () => void) => void,
   submitName: string
 ) {
+  let clipboardHandler: any
   const [loading, setLoading] = createSignal(false)
   function setFine(key: keyof(LocationInfo), value: any) {
     if (!value) return
     setLocation({ ...location()!, [key]: value })
   }
 
+  const onpaste = (e: ClipboardEvent) => {
+    if ((e.target as HTMLElement).nodeName === 'INPUT') return
+    e.stopPropagation()
+    navigator.clipboard.readText().then(text => {
+      var err: Error | undefined = undefined;
+      try {
+        const parsed = JSON.parse(text)
+        setFine('lat', parsed.lat)
+        setFine('long', parsed.long)
+        setFine('names', parsed.names)
+        setFine('misspellings', parsed.misspellings)
+        return
+      } catch (e) {err = e as Error}
+      try {
+        const coords = text.split(',').map(Number)
+        setFine('lat', coords[0])
+        setFine('long', coords[1])
+        return
+      } catch (e) {err = e as Error}
+
+      showErrorToast(err)
+    })
+  }
+
+  const oncopy = (e: ClipboardEvent) => {
+    e.stopPropagation()
+    navigator.clipboard.writeText(JSON.stringify(location()))
+  }
+
+  if (location()) {
+    setLocation(old => {
+      old!.lat = old!.lat ?? geolocation().lat ?? 0
+      old!.long = old!.long ?? geolocation().long ?? 0
+      return old
+    })
+  }
+
   return (
     <Dialog open={Boolean(location())} onOpenChange={() => setLocation(null)}>
-      <DialogContent>
+      <DialogContent
+        ref={clipboardHandler}
+        oncopy={oncopy}
+        onpaste={onpaste}
+      >
         <DialogHeader>
           <h3>{submitName} Location</h3>
         </DialogHeader>
-        <div
-          oncopy={e => {
-            e.stopPropagation()
-            navigator.clipboard.writeText(JSON.stringify(location()))
-          }}
-          onpaste={e => {
-            e.stopPropagation()
-            navigator.clipboard.readText().then(text => {
-              try {
-                const parsed = JSON.parse(text)
-                setFine('lat', parsed.lat)
-                setFine('long', parsed.long)
-                setFine('names', parsed.names)
-                setFine('misspellings', parsed.misspellings)
-                return
-              } catch (e) {showErrorToast(e as Error)}
-              try {
-                const coords = text.split(',').map(Number)
-                setFine('lat', coords[0])
-                setFine('long', coords[1])
-              } catch (e) {showErrorToast(e as Error)}
-            })
-          }}
-        >
+        <div>
           <TextField>
             <TextFieldLabel>Location Name</TextFieldLabel>
             <TextFieldInput
               placeholder='Location Name'
               type='text'
-              value={untrack(location)?.names?.join(', ')}
+              value={location()?.names?.join(', ')}
               onInput={(e) => {
                 setFine('names', (e.target as HTMLInputElement).value.split(',').map(s => s.trim()))
               }
@@ -82,7 +101,7 @@ function DialogueWithLocation(
             <TextFieldInput
               placeholder='Misspellings'
               type='text'
-              value={untrack(location)?.misspellings?.join(', ')}
+              value={location()?.misspellings?.join(', ')}
               onInput={(e) => {
                 setFine('misspellings', (e.target as HTMLInputElement).value.split(',').map(s => s.trim()))
               }
@@ -94,7 +113,7 @@ function DialogueWithLocation(
               placeholder={String(geolocation().lat ?? 'Latitude')}
               min={-90}
               max={90}
-              value={untrack(location)?.lat ?? geolocation().lat}
+              value={location()?.lat ?? geolocation().lat}
               type='number'
               onInput={(e) => {
                 setFine('lat', (e.target as HTMLInputElement).valueAsNumber)
@@ -107,7 +126,7 @@ function DialogueWithLocation(
               placeholder={String(geolocation().long ?? 'Longitude')}
               min={-180}
               max={180}
-              value={untrack(location)?.long ?? geolocation().long}
+              value={location()?.long ?? geolocation().long}
               type='number'
               onInput={(e) => {
                 setFine('long', (e.target as HTMLInputElement).valueAsNumber)
